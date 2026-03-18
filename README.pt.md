@@ -1,34 +1,17 @@
-# DSAN – Rede Descentralizada de Agentes Soberanos
+# DSAN - Sovereign Human Identity
+**Totem físico + rede agentes soberanos**
 
-**Idiomas**  
-[English](README.md) | [Português](README.pt.md)
+[![Python](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
+[![AGPLv3](https://img.shields.io/badge/License-AGPLv3-red)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)](tests/)
 
-## DSAN em uma frase
+## 🎯 O Que É DSAN
+Totem hardwallet humano controla rede agentes IA:
+- Biometria soberana (OffCloud)
+- Rede 2 nodes iniciais (OnCloud)  
+- Threat model STRIDE validado
 
-**Identidade digital soberana humana ancorada em totem físico, com supervisão de IA via biometria.**
-
-## Este repositório (v1.0)
-
-**Simulador Android** demonstrando:  
-- Geração BIP39 → DID  
-- Mock NFC para credenciais  
-- Desbloqueio por PIN  
-- Backup por QR code  
-
-## Tecnologias
-
-| Tecnologia | Função | Proprietário | Status |
-|------------|--------|--------------|--------|
-| ESP32-S3 | CPU/BLE | Espressif | Aberto |
-| ATECC608B | Elemento seguro | Microchip | Aberto |
-| AS608 | Digital | Genérico | Aberto |
-| MAX30102 | Frequência cardíaca | Maxim | Aberto |
-| BIP39 | Seed | Bitcoin | Público |
-| DID/VC | Identidade | W3C | Público |
-| SSI | Soberania | Padrão aberto | Público |
-| NFC/BLE | Comunicação | ISO/Bluetooth | Público |
-| gov.br | Credenciais BR | Governo | Público |
-
-**Seu IP único (AGPL-3.0)**: firmware totem, políticas humanas, modelo On/OffCloud.
-
-## Roadmap
+## 🚀 Quick Start
+```bash
+pip install -r requirements.txt
+python examples/basic_network.py
