@@ -15,3 +15,21 @@ Totem hardwallet humano controla rede agentes IA:
 ```bash
 pip install -r requirements.txt
 python examples/basic_network.py
+
+Saída esperada:
+🧬 4 agents criados (3 honestos + 1 malicious)
+🌐 8 steps com 10% packet loss
+✅ DSAN simulador funcionando
+
+📁 Estrutura
+docs/          ← Threat model + arquitetura
+examples/      ← Simulações prontas
+tests/         ← Testes automatizados
+
+Status Projeto
+✅ Simulador production-ready
+🧪 Threat model STRIDE completo
+📱 Totem Android (em desenvolvimento)
+🔒 AGPLv3 - copyleft SaaS
+
+Procure vulnerabilidades: docs/threat_model.md
