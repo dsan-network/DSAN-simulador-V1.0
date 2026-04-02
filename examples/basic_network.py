@@ -1,26 +1,17 @@
-"""
-DSAN-Sim: Exemplo básico de rede.
-Testa: identidade, mensagens assinadas, perda de rede.
-"""
+# exemplos/basic_network.py
+from dsan_sim import DSANAgent, DSANSimulator
 
-from dsan_sim.agent import DSANAgent
-from dsan_sim.simulator import DSANSimulator
+def run_demo():
+    print("--- DSAN NETWORK DEMO ---")
+    agents = [DSANAgent(f"node_{i}") for i in range(5)]
+    sim = DSANSimulator(agents, network_loss=0.05)
+    
+    # Todos mandam um PING para o node_0
+    for i in range(1, 5):
+        sim.send_message(f"node_{i}", "node_0", {"msg": "Hello DSAN"})
+    
+    print("\nEstado Final do Node_0:")
+    print(agents[0].get_state_proof())
 
-# Cria 4 agentes soberanos
-print("🧬 Criando agentes...")
-agents = [
-    DSANAgent("totem-001"),
-    DSANAgent("totem-002"),
-    DSANAgent("totem-003"),
-    DSANAgent("malicious")  # Para testes futuros
-]
-
-# Inicia simulador (10% perda de rede)
-sim = DSANSimulator(agents, network_loss=0.1)
-
-# Executa 8 steps
-print("🌐 Executando simulação...")
-sim.run(steps=8)
-
-print("\n🎉 DSAN-Sim v0.1 funcionando!")
-print("Baixe ZIP e rode localmente para ver logs completos.")
+if __name__ == "__main__":
+    run_demo()
