@@ -3,4 +3,4 @@ from .agent import DSANAgent, DSANTotem
 from .simulator import DSANSimulator
 
 __version__ = "1.1.0"
-__all__ = ["DSANAgent", "DSANTotem", "DSANSimulator"]
+__author__ = "Subverso / DSAN Team"
