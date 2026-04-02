@@ -1,12 +1,6 @@
-"""
-DSAN-sim v1.0
+# dsan_sim/__init__.py
+from .agent import DSANAgent, DSANTotem
+from .simulator import DSANSimulator
 
-Package for simulating the Decentralized Sovereign Agent Network (DSAN).
-
-Modules:
-- agent.py      → DSANAgent class and agent logic
-- simulator.py  → basic network simulation / examples
-"""
-
-from .agent import DSANAgent
-from .simulator import DSANSimulator  # se existir essa classe, senão remova esta linha
+__version__ = "1.1.0"
+__all__ = ["DSANAgent", "DSANTotem", "DSANSimulator"]
