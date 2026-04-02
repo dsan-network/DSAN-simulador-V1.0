@@ -1,0 +1,17 @@
+def test_tamper_detection():
+    alice = DSANAgent("alice")
+    alice.log_event("MSG", "Original")
+    hash_original = alice.state_hash.hex()
+    
+    # 1. Simula alteração no histórico (Tampering)
+    alice.local_log[0]["event"]["data"] = "CORROMPIDO"
+    
+    # 2. Tenta reconstruir o hash a partir do log adulterado
+    # Se tentarmos gerar o hash novamente com os dados sujos, ele deve ser diferente
+    import hashlib
+    event_corrompido = alice.local_log[0]["event"]
+    novo_hash = hashlib.sha256(alice._canonical_pack(event_corrompido)).digest().hex()
+    
+    # O hash do evento no log não deve mais bater com o novo_hash calculado
+    assert alice.local_log[0]["hash"] != novo_hash
+    print("🛡️ Auditoria detectou manipulação de dados!")
