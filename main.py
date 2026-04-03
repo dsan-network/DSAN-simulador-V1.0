@@ -19,15 +19,30 @@ def cli():
 @click.argument('receiver_id')
 @click.argument('msg')
 def send(sender_id, receiver_id, msg):
-    """Envia uma mensagem assinada entre agentes."""
+    """Envia mensagem apenas após validação gestual no Totem."""
     alice = get_agent(sender_id)
     bob = get_agent(receiver_id)
     
-    sim = DSANSimulator([alice, bob], network_loss=0)
+    click.secho(f"\n--- 💍 AGUARDANDO TOTEM ({sender_id}) ---", fg='yellow', bold=True)
+    click.echo("Sensores ativos. Realize sua sequência gestual:")
+    click.echo("0:Polegar | 1:Indicador | 2:Médio | 3:Anelar")
     
-    click.secho(f"🚀 Enviando de {sender_id}...", fg='cyan')
-    sim.send_message(sender_id, receiver_id, {"type": "CHAT", "content": msg})
-    click.secho("✅ Protocolo de entrega finalizado.", fg='green')
+    # Simula a captura dos sensores do SmartRing
+    gesture_input = click.prompt("Digite a sequência (ex: 120)", type=str)
+    gesture_list = [int(d) for d in gesture_input]
+
+    # O Agente pede permissão ao Totem
+    if not alice.totem.verify_gesture(gesture_list):
+        click.secho("❌ ERRO: Gesto incorreto! O Totem permaneceu trancado.", fg='red', bold=True)
+        return
+
+    click.secho("✅ GESTO RECONHECIDO. Assinando com Ed25519...", fg='green')
+    
+    sim = DSANSimulator([alice, bob])
+    payload = {"type": "DREX_TRANSF", "content": msg}
+    
+    if sim.send_message(sender_id, receiver_id, payload):
+        click.secho("🚀 Transação enviada com sucesso!", fg='cyan')
 
 @cli.command()
 @click.argument('name')
@@ -38,7 +53,10 @@ def audit(name):
     click.secho(f"\n📊 RELATÓRIO DE AUDITORIA: {name.upper()}", fg='yellow', bold=True)
     click.echo(f"ID Soberano: {agent.id}")
     click.echo(f"State Hash:  ", nl=False)
-    click.secho(agent.state_hash.hex(), fg='magenta')
+    
+    # CORREÇÃO: Removido o .hex() porque o state_hash agora já é uma string
+    click.secho(agent.state_hash, fg='magenta') 
+    
     click.echo(f"Log Height:  {len(agent.local_log)} eventos")
     click.echo("-" * 40)
     
@@ -46,7 +64,15 @@ def audit(name):
         ev = entry['event']
         click.echo(f"[{i}] ", nl=False)
         click.secho(f"{ev['type']}", fg='green', nl=False)
-        click.echo(f" | Data: {ev['data']['payload'].get('content', 'N/A')[:20]}...")
+        
+        # Extrai o conteúdo para exibição
+        content = ev.get('data', {}).get('content', 'N/A')
+        
+        # Se for um dicionário (nosso payload json decifrado), converte pra string pra ler
+        if isinstance(content, dict):
+            content = str(content)
+            
+        click.echo(f" | Data: {content[:50]}...")
 
 @cli.command()
 @click.argument('target')

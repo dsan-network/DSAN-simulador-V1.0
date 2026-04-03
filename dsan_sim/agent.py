@@ -1,111 +1,130 @@
-import hashlib
-import time
 import json
+import hashlib
 import os
-from typing import List, Dict, Any
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import ed25519
+import base64
+from cryptography.hazmat.primitives.asymmetric import ed25519, x25519
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.fernet import Fernet
 
 class DSANTotem:
-    """Hardware Root of Trust - Gera e protege chaves Ed25519."""
-    def __init__(self):
-        self._private_key = ed25519.Ed25519PrivateKey.generate()
-        self.public_key = self._private_key.public_key()
-        self.public_key_bytes = self.public_key.public_bytes(
-            encoding=serialization.Encoding.Raw,
-            format=serialization.PublicFormat.Raw
-        )
-    def sign(self, data: bytes) -> bytes:
-        return self._private_key.sign(data)
+    def __init__(self, gesture_sequence=None):
+        # Chaves de Assinatura e Criptografia
+        self.sig_private = ed25519.Ed25519PrivateKey.generate()
+        self.enc_private = x25519.X25519PrivateKey.generate()
+        
+        # O Gesto Soberano: Padrão [1, 2, 0] (Indicador, Médio, Polegar)
+        self.unlock_gesture = gesture_sequence or [1, 2, 0] 
 
+    def verify_gesture(self, input_sequence):
+        """Validação física no SmartRing."""
+        return input_sequence == self.unlock_gesture
+
+    def get_public_keys(self):
+        return {
+            "sig": self.sig_private.public_key().public_bytes_raw().hex(),
+            "enc": self.enc_private.public_key().public_bytes_raw().hex()
+        }
+
+    def generate_shared_key(self, peer_enc_pub_hex):
+        """Cria o segredo compartilhado para E2EE (X25519)."""
+        peer_pub_bytes = bytes.fromhex(peer_enc_pub_hex)
+        peer_pub = x25519.X25519PublicKey.from_public_bytes(peer_pub_bytes)
+        shared_secret = self.enc_private.exchange(peer_pub)
+        
+        # Derivação de chave AES segura
+        derived_key = HKDF(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=None,
+            info=b'dsan-v1.2-e2ee',
+        ).derive(shared_secret)
+        
+        return base64.urlsafe_b64encode(derived_key)
+    
 class DSANAgent:
-    def __init__(self, agent_id: str, storage_dir: str = "data/agents"):
+    def __init__(self, agent_id):
         self.id = agent_id
-        # Garante que a pasta de dados existe
-        if not os.path.exists(storage_dir):
-            os.makedirs(storage_dir, exist_ok=True)
-            
-        self.storage_path = os.path.join(storage_dir, f"{agent_id}.json")
-        
-        # Inicializa o Totem (Identidade)
         self.totem = DSANTotem()
-        self.public_key_bytes = self.totem.public_key_bytes
-        
-        # Estado Interno
-        self.inbox: List[Dict] = []
-        self.local_log: List[Dict] = []
-        self.state_hash = b"\x00" * 32
-        self.last_nonces: Dict[str, float] = {}
-
-        # Tenta restaurar estado anterior
+        self.local_log = []
+        self.state_hash = "0" * 64
+        self.data_path = f"data/agents/{agent_id}.json"
+        os.makedirs("data/agents", exist_ok=True)
         self.load_state()
 
-    def _canonical_pack(self, msg: Dict[str, Any]) -> bytes:
-        """Gera JSON determinístico para assinatura/hashing."""
-        return json.dumps(msg, sort_keys=True, separators=(',', ':')).encode()
+    def encrypt_payload(self, recipient_enc_pub_hex, payload_dict):
+        """Cifra o conteúdo para o destinatário."""
+        shared_key = self.totem.generate_shared_key(recipient_enc_pub_hex)
+        fernet = Fernet(shared_key)
+        payload_json = json.dumps(payload_dict).encode()
+        return fernet.encrypt(payload_json).decode()
 
-    def save_state(self):
-        """Persiste o log e hash no disco."""
-        state_data = {
-            "state_hash": self.state_hash.hex(),
-            "last_nonces": self.last_nonces,
-            "local_log": self.local_log,
-            "public_key": self.public_key_bytes.hex()
+    def decrypt_payload(self, sender_enc_pub_hex, encrypted_data):
+        """Decifra o conteúdo vindo do remetente."""
+        shared_key = self.totem.generate_shared_key(sender_enc_pub_hex)
+        fernet = Fernet(shared_key)
+        decrypted_json = fernet.decrypt(encrypted_data.encode())
+        return json.loads(decrypted_json.decode())
+
+    def sign_message(self, payload, recipient_pub_keys=None):
+        """Cifra se houver chaves do destinatário, senão apenas assina."""
+        final_payload = payload
+        is_encrypted = False
+
+        if recipient_pub_keys:
+            final_payload = self.encrypt_payload(recipient_pub_keys['enc'], payload)
+            is_encrypted = True
+
+        envelope = {
+            "sender_id": self.id,
+            "payload": final_payload,
+            "encrypted": is_encrypted,
+            "sender_enc_pub": self.totem.get_public_keys()['enc']
         }
-        with open(self.storage_path, 'w') as f:
-            json.dump(state_data, f, indent=4)
-
-    def load_state(self):
-        """Recupera estado do disco se disponível."""
-        if os.path.exists(self.storage_path):
-            try:
-                with open(self.storage_path, 'r') as f:
-                    data = json.load(f)
-                    self.state_hash = bytes.fromhex(data["state_hash"])
-                    self.last_nonces = data["last_nonces"]
-                    self.local_log = data["local_log"]
-                return True
-            except:
-                return False
-        return False
-
-    def sign_message(self, payload: Dict[str, Any]):
-        envelope = {"payload": payload, "nonce": time.time(), "sender_id": self.id}
-        signature = self.totem.sign(self._canonical_pack(envelope))
+        
+        envelope_json = json.dumps(envelope, sort_keys=True).encode()
+        signature = self.totem.sig_private.sign(envelope_json).hex()
         return signature, envelope
 
-    def receive(self, envelope: Dict, signature: bytes, sender_pubkey: bytes) -> bool:
+    def receive(self, envelope, signature, sender_sig_pub_hex):
+        """Valida, decifra (se necessário) e loga."""
+        sender_sig_pub = ed25519.Ed25519PublicKey.from_public_bytes(bytes.fromhex(sender_sig_pub_hex))
+        envelope_json = json.dumps(envelope, sort_keys=True).encode()
+        
         try:
-            sender_id = envelope.get("sender_id")
-            nonce = envelope.get("nonce", 0)
+            sender_sig_pub.verify(bytes.fromhex(signature), envelope_json)
             
-            # Anti-Replay
-            if sender_id in self.last_nonces and nonce <= self.last_nonces[sender_id]:
-                return False 
+            # Se estiver cifrado, decifra antes de salvar no log (ou salva cifrado para auditoria)
+            data = envelope['payload']
+            if envelope.get('encrypted'):
+                data = self.decrypt_payload(envelope['sender_enc_pub'], data)
             
-            # Verificação Criptográfica
-            sender_key = ed25519.Ed25519PublicKey.from_public_bytes(sender_pubkey)
-            sender_key.verify(signature, self._canonical_pack(envelope))
-            
-            self.last_nonces[sender_id] = nonce
-            self.log_event("MSG_ACCEPTED", {"from": sender_id, "payload": envelope['payload']})
+            self.log_event("MSG_ACCEPTED", {"from": envelope['sender_id'], "content": data})
             return True
-        except:
+        except Exception as e:
+            print(f"Erro na recepção: {e}")
             return False
 
-    def log_event(self, event_type: str, data: Any):
-        """Encadeia eventos e salva no disco."""
-        event = {"type": event_type, "data": data, "prev_hash": self.state_hash.hex()}
-        event_hash = hashlib.sha256(self._canonical_pack(event)).digest()
+    def log_event(self, event_type, data):
+        event = {
+            "type": event_type,
+            "prev_hash": self.state_hash,
+            "data": data
+        }
+        event_json = json.dumps(event, sort_keys=True).encode()
+        event_hash = hashlib.sha256(event_json).hexdigest()
         
-        self.local_log.append({"event": event, "hash": event_hash.hex()})
-        self.state_hash = hashlib.sha256(self.state_hash + event_hash).digest()
-        
+        self.local_log.append({"hash": event_hash, "event": event})
+        self.state_hash = event_hash
         self.save_state()
 
-    def get_state_proof(self) -> Dict:
-        return {
-            "agent_id": self.id, 
-            "state_hash": self.state_hash.hex(), 
-            "log_height": len(self.local_log)
-        }
+    def save_state(self):
+        with open(self.data_path, 'w') as f:
+            json.dump({"state_hash": self.state_hash, "log": self.local_log, "pub_keys": self.totem.get_public_keys()}, f, indent=4)
+
+    def load_state(self):
+        if os.path.exists(self.data_path):
+            with open(self.data_path, 'r') as f:
+                data = json.load(f)
+                self.state_hash = data.get("state_hash", "0" * 64)
+                self.local_log = data.get("log", [])
