@@ -1,36 +1,29 @@
-# DSAN Totem v0.1 – Hardwallet Soberana
+# Especificação Técnica: Totem Criptográfico (v1.1)
 
-## Hardware mínimo
-Microcontrolador: ESP32-S3 (WiFi/BLE, R$30)
-HSM: ATECC608B (FIPS, R$10)
-Interface: PIN de 6 dígitos + NFC
-Backup: Semente BIP39 de 24 palavras
-Firmware: AGPL3 open source
+O Totem é a **Raiz de Confiança (Root of Trust)** da DSAN. Sua função é isolar as chaves privadas do ambiente de execução do Agente (que pode estar na nuvem ou em hardware menos seguro).
 
-## Fabricantes certificados (futuro)
-✅ Ledger/Trezor DSAN Edition
-✅ Hardware aberto (Seeed/XIAO)
-✅ Empresas BR (certificado Anatel)
+## 1. Arquitetura de Isolamento
+No simulador v1.1, a classe `DSANTotem` simula um elemento seguro (Secure Element):
+- **Geração de Chaves:** Utiliza a curva elíptica `Ed25519`.
+- **Interface de Assinatura:** O Agente envia um `payload` e recebe uma `assinatura`. A chave privada nunca deixa o escopo da classe `Totem`.
 
-## Fluxo de segurança
-Compre totem certificado DSAN
+## 2. Protocolo de Envelope
+Cada mensagem gerada pelo Totem segue o formato:
+- **Payload:** Os dados da aplicação.
+- **Nonce:** Timestamp de alta precisão para evitar ataques de Replay.
+- **Sender_ID:** Identificador soberano do remetente.
 
-PIN inicial → semente de gera (salve papel)
+## 3. Requisitos de Hardware (Futuro)
+Para a implementação física, os alvos são:
+- **ESP32-S3:** Utilizando o Secure Boot e Flash Encryption.
+- **Raspberry Pi CM4:** Utilizando módulos TPM externos.
+- **Android (OffCloud):** Utilizando o Android Keystore System / StrongBox.
 
-Totem cria: DID + chaves agentes + AES memória
-
-Semente de backup = total
-
-Falha no totem? Semente → novo totem
-
-## Propriedades
-🔒 Chaves NUNCA expostas
-🛡️ PIN + 3 tentativas = lockout
-💥 Autodestruição (opcional)
-🔄 Recuperação: seed + hardware novo
-📱 App: aprovação de ações remotas
-
-## Mock no simulador
-Veja `totem_mock.py` (futuro).
-
-**Convocação**: Fabricantes, firmware devs → colaborem.
+## 4. Vetores de Ataque Mitigados
+- **Extração de Chaves:** Como a chave reside no Totem, um Agente comprometido não pode roubar a identidade do usuário.
+- **Manipulação de Histórico:** O Totem assina o estado atual, permitindo que qualquer nó da rede verifique a integridade do log.
+## Validação de Fluxo v1.1
+O protocolo foi testado com sucesso em ambiente distribuído (Codespaces) apresentando:
+1. **Handshake Bi-direcional:** Alice e Bob trocam estados e atualizam hashes locais.
+2. **Persistência JSON:** O estado sobrevive ao encerramento do processo.
+3. **Imutabilidade Reversa:** O `prev_hash` de cada evento impede a reescrita do histórico sem quebra do `state_hash` final.

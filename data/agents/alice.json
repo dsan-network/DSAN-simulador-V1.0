@@ -1,0 +1,23 @@
+{
+    "state_hash": "91df5870c61eee843b6e74311a1b40c6e761ea315c1ba8858cd67bcc5cc21fa3",
+    "last_nonces": {
+        "bob": 1775193418.2982585
+    },
+    "local_log": [
+        {
+            "event": {
+                "type": "MSG_ACCEPTED",
+                "data": {
+                    "from": "bob",
+                    "payload": {
+                        "type": "CHAT",
+                        "content": "Entendido, alterando temperatura."
+                    }
+                },
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            "hash": "1e40934ccb8219785072bd7afce625b92f383ccdbbe5c81d0f53d0f8f0dee8af"
+        }
+    ],
+    "public_key": "694a885c55a11131239ac39d62ca5812944a2ae06d83a6767c3c3a4c382526d6"
+}

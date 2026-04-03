@@ -1,0 +1,37 @@
+{
+    "state_hash": "ae0826a06b06917841ad390734a5311e93d3cc8fae211e6ea90a6ce0fed7b694",
+    "last_nonces": {
+        "alice": 1775193228.1278913
+    },
+    "local_log": [
+        {
+            "event": {
+                "type": "MSG_ACCEPTED",
+                "data": {
+                    "from": "alice",
+                    "payload": {
+                        "type": "CHAT",
+                        "content": "Ola Mundo"
+                    }
+                },
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            "hash": "eedeb49eb2da4ce45ec71468a7d138142319f3c723aed5198d08e2959aaa7db5"
+        },
+        {
+            "event": {
+                "type": "MSG_ACCEPTED",
+                "data": {
+                    "from": "alice",
+                    "payload": {
+                        "type": "CHAT",
+                        "content": "Aumentar temperatura para 22\u00b0C"
+                    }
+                },
+                "prev_hash": "c0e29cec3f396ecad7ab214a50cc4430236aa62d113942bd29ebf2f432d0032b"
+            },
+            "hash": "2914a40832861bae89e1c00850fd13b876ff2549b11a86baac36d8715a8c73ec"
+        }
+    ],
+    "public_key": "44625e2be3cd0a4952468cbfb8a66a77c9c4664ecb9848745ce721d78abe238c"
+}

@@ -28,3 +28,20 @@ def test_replay_attack_prevention():
     
     # Segunda vez (Replay): deve rejeitar
     assert bob.receive(envelope, sig, alice.public_key_bytes) is False
+    def test_impersonation_prevention():
+    """RN-004: O agente deve rejeitar assinaturas de chaves não autorizadas."""
+    alice = DSANAgent("alice")
+    hacker = DSANAgent("hacker") # Cria uma identidade válida, mas diferente
+    bob = DSANAgent("bob")
+    
+    # Hacker assina uma mensagem com sua própria chave (Totem do Hacker)
+    # Mas tenta injetar o ID da 'alice' no envelope
+    sig_hacker, env_hacker = hacker.sign_message({"cmd": "transfer", "to": "hacker_wallet"})
+    env_hacker["sender_id"] = "alice" 
+    
+    # Bob tenta validar a mensagem usando a chave pública REAL da Alice
+    # O sistema deve detectar que a assinatura não bate com a chave da Alice
+    success = bob.receive(env_hacker, sig_hacker, alice.public_key_bytes)
+    
+    assert success is False
+    print("🛡️ Segurança de Identidade: Impersonificação bloqueada com sucesso.")
