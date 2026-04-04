@@ -1,35 +1,6 @@
-# DSAN - Sovereign Human Identity
-**Totem físico + rede agentes soberanos**
-
-[![Python](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
-[![AGPLv3](https://img.shields.io/badge/License-AGPLv3-red)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen)](tests/)
-
-## 🎯 O Que É DSAN
-Totem hardwallet humano controla rede agentes IA:
-- Biometria soberana (OffCloud)
-- Rede 2 nodes iniciais (OnCloud)  
-- Threat model STRIDE validado
-
-## 🚀 Quick Start
-```bash
-pip install -r requirements.txt
-python examples/basic_network.py
-
-Saída esperada:
-🧬 4 agents criados (3 honestos + 1 malicious)
-🌐 8 steps com 10% packet loss
-✅ DSAN simulador funcionando
-
-📁 Estrutura
-docs/          ← Threat model + arquitetura
-examples/      ← Simulações prontas
-tests/         ← Testes automatizados
-
-Status Projeto
-✅ Simulador production-ready
-🧪 Threat model STRIDE completo
-📱 Totem Android (em desenvolvimento)
-🔒 AGPLv3 - copyleft SaaS
-
-Procure vulnerabilidades: docs/threat_model.md
+ DSAN Simulator V1.5: Soberania DigitalEste simulador implementa a comunicação entre Nós Soberanos utilizando o protocolo DSAN (Decentralized Sovereign Agent Network). O sistema garante a integridade e a identidade através de Totens Criptográficos baseados em curvas elípticas ($Ed25519$ para assinaturas e $X25519$ para sigilo).🚀 O que há de novo na V1.5?Zero-Space Serialization: Empacotamento JSON a vácuo para evitar quebras de assinatura em trânsito.Identity Persistence: Carregamento automático de identidades a partir de data/agents/.E2EE (End-to-End Encryption): Cifragem automática de payloads sensíveis via Fernet (AES).🛠️ Instalação RápidaPrepare o ambiente:Bashpip install flask requests cryptography click
+Limpe resquícios de sessões anteriores:Bashrm -rf data/agents/*.json
+🕹️ Como Operar o SimuladorPara rodar o teletransporte de mensagens, você precisará de dois terminais abertos no seu Codespace.1. Iniciar o Nó Receptor (Bob)No Terminal 1, suba o nó soberano que ficará ouvindo a rede:Bashpython node.py bob 5001
+2. Gerar Identidades e Enviar (Alice)No Terminal 2, primeiro garanta que a Alice e o Bob existam no "disco" e depois faça o disparo:Passo A (Bootstrap):Bashpython -c "from dsan_sim.agent import DSANAgent; DSANAgent('alice'); DSANAgent('bob')"
+Passo B (Teletransporte):Bashpython main.py send alice bob "Soberania v1.5 Confirmada" --port 5001
+🔐 Camadas de SegurançaO simulador opera em 4 estágios críticos:CamadaTecnologiaFunçãoGestoSequência 120Desbloqueio físico do Totem (SmartRing).Identidade$Ed25519$Garante que a Alice é realmente a Alice.Sigilo$X25519$ + Diffie-HellmanCria um túnel criptográfico entre os nós.LedgerSHA-256 ChainingCada mensagem gera um hash vinculado à anterior.⚠️ Troubleshooting (Soco no Estômago)Se encontrar o erro "Falha na validação criptográfica":O Bob e a Alice provavelmente estão com chaves diferentes na memória.Solução: Pare o Bob (Ctrl+C), rode rm -rf data/agents/*.json e repita o processo de "Gerar Identidades".Lembre-se: O DSAN é implacável. Se um único bit mudar no caminho (espaço, vírgula), o Totem barrará a entrada.Status do Sistema: STABLEVersão: 1.5.0-SoberanaDesenvolvedor: @subverso 
