@@ -1,3 +1,5 @@
+![License](https://img.shields.io/badge/license-Apache%202.0-blue)
+
 🛡️ DSAN Simulator V1.6: Protocolo de ResiliênciaO DSAN (Decentralized Sovereign Agent Network) é um simulador de rede descentralizada de alta segurança. Ele utiliza um modelo de Totem Criptográfico para garantir que a identidade e a integridade dos dados sejam imutáveis, mesmo em ambientes de rede hostis.Esta versão (v1.6) foi testada contra ataques de Man-in-the-Middle (MitM) e falsificação de assinatura, provando-se matematicamente segura.
 
 💎 Diferenciais do ProtocoloIdentidade Determinística: Chaves $Ed25519$ persistentes que garantem a "mente" do agente entre sessões.
