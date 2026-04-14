@@ -20,7 +20,10 @@ Envio Autorizado pelo Totem:Bashpython main.py send alice bob "Mensagem Criptogr
 
 🚨 Relatório de Teste de Estresse (Ataque MitM)Durante o desenvolvimento da V1.6, simulamos um ataque alterando a assinatura no main.py.Resultado: O nó receptor identificou a discrepância e disparou um [ERRO INTERNO DE CRIPTOGRAFIA].Status: Aprovado. O sistema prefere o silêncio à aceitação de um dado corrompido.
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c3bb282 (update: license + padronização DSAN)
 ## License
 
 This project is licensed under the Apache License 2.0.
@@ -29,6 +32,7 @@ You are free to use, modify, and distribute this software, provided that proper 
 
 For more details, see the LICENSE file.
 
+<<<<<<< HEAD
 
 ## Intellectual Property Notice
 
@@ -39,6 +43,8 @@ Certain aspects of the DSAN architecture, including applied systems and executio
 This repository provides a public reference implementation and conceptual architecture only.
 
 
+=======
+>>>>>>> c3bb282 (update: license + padronização DSAN)
 Status: OPERATIONAL
 Segurança: MIL-SPEC
 Desenvolvedor: @subverso
