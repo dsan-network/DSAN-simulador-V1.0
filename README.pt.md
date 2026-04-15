@@ -55,6 +55,12 @@ Previous versions of this project were released under GNU AGPLv3.
 
 As of version X.X, the project is licensed under Apache License 2.0.
 
+## DSAN Ecosystem
+
+This repository is part of the DSAN Network.
+
+Core protocol:
+👉 https://github.com/dsan-network/dsan-ecosystem
 
 =======
 >>>>>>> c3bb282 (update: license + padronização DSAN)
