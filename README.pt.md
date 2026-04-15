@@ -33,10 +33,6 @@ It is intended for:
 
 It does not represent a production implementation.
 
-<<<<<<< HEAD
-
-=======
->>>>>>> c3bb282 (update: license + padronização DSAN)
 ## License
 
 This project is licensed under the Apache License 2.0.
@@ -44,8 +40,6 @@ This project is licensed under the Apache License 2.0.
 You are free to use, modify, and distribute this software, provided that proper attribution is maintained.
 
 For more details, see the LICENSE file.
-
-<<<<<<< HEAD
 
 ## Intellectual Property Notice
 
