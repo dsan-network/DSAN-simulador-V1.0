@@ -20,6 +20,19 @@ Envio Autorizado pelo Totem:Bashpython main.py send alice bob "Mensagem Criptogr
 
 🚨 Relatório de Teste de Estresse (Ataque MitM)Durante o desenvolvimento da V1.6, simulamos um ataque alterando a assinatura no main.py.Resultado: O nó receptor identificou a discrepância e disparou um [ERRO INTERNO DE CRIPTOGRAFIA].Status: Aprovado. O sistema prefere o silêncio à aceitação de um dado corrompido.
 
+
+## Purpose
+
+This repository provides a simulation environment for the DSAN protocol.
+
+It is intended for:
+
+- testing  
+- validation  
+- educational purposes  
+
+It does not represent a production implementation.
+
 <<<<<<< HEAD
 
 =======
@@ -41,6 +54,12 @@ This repository contains part of the DSAN (Decentralized Sovereign Agent Network
 Certain aspects of the DSAN architecture, including applied systems and execution models, may be subject to intellectual property protection and are not fully disclosed in this repository.
 
 This repository provides a public reference implementation and conceptual architecture only.
+
+## License Note
+
+Previous versions of this project were released under GNU AGPLv3.
+
+As of version X.X, the project is licensed under Apache License 2.0.
 
 
 =======
